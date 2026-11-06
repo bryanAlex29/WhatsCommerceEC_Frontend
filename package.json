@@ -1,0 +1,38 @@
+{
+  "name": "whatscommerceec-mobile",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.ts",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "setup:local": "node scripts/setup-local.cjs",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "jest --runInBand && npm run test:setup",
+    "test:setup": "node --test scripts/setup-local.test.cjs"
+  },
+  "dependencies": {
+    "expo": "58.0.23",
+    "expo-secure-store": "58.0.2",
+    "react": "19.3.0",
+    "react-native": "0.88.1",
+    "react-native-safe-area-context": "~5.11.1"
+  },
+  "devDependencies": {
+    "@testing-library/react-native": "^13.3.3",
+    "@types/jest": "^30.0.0",
+    "@types/react": "~19.3.0",
+    "eslint": "^9.39.0",
+    "eslint-config-expo": "~58.0.0",
+    "jest": "~30.5.2",
+    "jest-expo": "~58.0.0",
+    "react-test-renderer": "19.3.0",
+    "typescript": "~6.0.3"
+  },
+  "description": "Cliente Android/iOS de WhatsCommerce EC: acceso seguro y contexto empresarial"
+}
