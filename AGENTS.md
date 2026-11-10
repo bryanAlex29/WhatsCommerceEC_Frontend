@@ -1,0 +1,5 @@
+# Aplicación móvil
+
+Consultar `../AGENTS.md` y `../docs/DERCAS.md` (especificación funcional vigente) en el workspace de contexto. El Word `../Contexto/WhatsCommerce-EC-Documentacion-Dercas.docx` es el antecedente histórico. Si faltan las fuentes vigentes, solicitarlas; este checkout no las sustituye.
+
+Subfase 1.4 autorizada: React Native + Expo + TypeScript estricto, Android/iOS; login, restauración explícita, selector empresarial, consulta BASIC/FULL y logout, conservando health público. Componentes reutilizables de primitivas React Native con composición inspirada en shadcn, paleta y logo oficiales; sin importar componentes web ni kit visual tercero. Expo SecureStore aprobado sujeto a compatibilidad. Sin CRUD de usuarios/plataforma, UI de invitaciones, backend, AdminWeb, secretos ni SQL. Publicación inicial autorizada por el propietario mediante ramas de trabajo y PR hacia develop, sin commits directos sobre main/develop ni integración automática. Publicaciones posteriores requieren autorización expresa. Las pruebas del cliente puro no acreditan ejecución nativa en dispositivos.
