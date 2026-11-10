@@ -2,11 +2,13 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { AppState, Text, View } from 'react-native';
 import { Session } from '../auth/session';
 import { Button, Card, Field, Notice, ui } from '../components/ui';
+import { PasswordRecoveryScreen } from './PasswordRecoveryScreen';
 
 const statuses = { ACTIVE: 'Activa', SUSPENDED: 'Suspendida', PENDING_ACTIVATION: 'Pendiente de activación' };
 export function AccessScreen({ session }: { session: Session }) {
   const state = useSyncExternalStore(session.subscribe, session.getSnapshot);
   const [email, setEmail] = useState(''); const [password, setPassword] = useState(''); const [validation, setValidation] = useState('');
+  const [recovering, setRecovering] = useState(false);
   const appState = useRef(AppState.currentState);
   useEffect(() => {
     const subscription = AppState.addEventListener('change', next => {
@@ -22,6 +24,10 @@ export function AccessScreen({ session }: { session: Session }) {
     setValidation(''); const submitted = password; const submittedEmail = email;
     setPassword(''); setEmail(''); void session.login(submittedEmail, submitted);
   }
+  if (recovering && !state.user) return <PasswordRecoveryScreen onBack={completed => {
+    if (completed) void session.logout('Contraseña actualizada. Inicia sesión nuevamente.');
+    setRecovering(false);
+  }} />;
   return <View style={{ gap: 20 }}>
     <Text accessibilityRole="header" style={ui.title}>{state.user ? 'Tu espacio de trabajo' : 'Iniciar sesión'}</Text>
     <Notice>{validation || state.message}</Notice>
@@ -30,6 +36,7 @@ export function AccessScreen({ session }: { session: Session }) {
       <Field label="Correo electrónico" value={email} onChangeText={setEmail} autoCapitalize="none" autoCorrect={false} keyboardType="email-address" autoComplete="email" maxLength={1024} editable={!state.busy} />
       <Field label="Contraseña" value={password} onChangeText={setPassword} secureTextEntry autoCapitalize="none" autoCorrect={false} autoComplete="off" textContentType="none" editable={!state.busy} onSubmitEditing={login} />
       <Button disabled={state.busy} onPress={login}>Ingresar</Button>
+      <Button disabled={state.busy} onPress={() => { setEmail(''); setPassword(''); setValidation(''); setRecovering(true); }}>¿Olvidaste tu contraseña?</Button>
       <Button disabled={state.busy} onPress={() => { setValidation(''); setPassword(''); setEmail(''); void session.restore(); }}>Restaurar sesión guardada</Button>
       <Text style={ui.text}>No hay registro público. El primer administrador se aprovisiona desde consola local autorizada. La aceptación de invitaciones tendrá su propia pantalla en una entrega posterior.</Text>
     </Card> : <>

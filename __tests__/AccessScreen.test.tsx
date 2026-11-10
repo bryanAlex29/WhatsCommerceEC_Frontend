@@ -19,6 +19,16 @@ function setup() {
 }
 beforeEach(() => jest.spyOn(AppState, 'addEventListener').mockReturnValue({ remove: jest.fn() }));
 afterEach(() => jest.restoreAllMocks());
+it('abre recuperación desde login, limpia contraseña y permite volver', () => {
+  const { session, transport } = setup(); render(<AccessScreen session={session} />);
+  fireEvent.changeText(screen.getByLabelText('Contraseña'), 'SyntheticSecret!');
+  fireEvent.press(screen.getByRole('button', { name: '¿Olvidaste tu contraseña?' }));
+  expect(screen.getByLabelText('Correo registrado')).toBeTruthy();
+  expect(screen.queryByLabelText('Contraseña')).toBeNull();
+  fireEvent.press(screen.getByRole('button', { name: 'Volver al login' }));
+  expect(screen.getByLabelText('Contraseña').props.value).toBe('');
+  expect(transport).not.toHaveBeenCalled();
+});
 it('campos etiquetados y protegidos; validación local no envía vacío', () => {
   const { session, transport } = setup(); render(<AccessScreen session={session} />);
   expect(screen.getByLabelText('Contraseña').props.secureTextEntry).toBe(true);

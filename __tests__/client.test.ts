@@ -25,3 +25,12 @@ it('logout requiere 204 y no lee JSON de éxito', async () => {
   const json = jest.fn(); fetchMock.mockResolvedValue({ ok: true, status: 204, json });
   await request('/auth/logout', { method: 'POST', body: { refreshToken: 'a'.repeat(43) } }); expect(json).not.toHaveBeenCalled();
 });
+it('recuperación exige 202/204 y rechaza otros éxitos sin reintentar', async () => {
+  const json = jest.fn(async () => ({ message: 'synthetic' }));
+  fetchMock.mockResolvedValueOnce({ ok: true, status: 202, json });
+  await expect(request('/auth/password-recovery/request', { method: 'POST' })).resolves.toEqual({ message: 'synthetic' });
+  fetchMock.mockResolvedValueOnce({ ok: true, status: 204, json });
+  await expect(request('/auth/password-recovery/reset', { method: 'POST' })).resolves.toBeUndefined();
+  fetchMock.mockResolvedValueOnce({ ok: true, status: 200, json });
+  await expect(request('/auth/password-recovery/reset', { method: 'POST' })).rejects.toBeInstanceOf(ApiError);
+});
