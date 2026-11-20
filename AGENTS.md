@@ -1,0 +1,13 @@
+# Aplicación móvil
+
+Rediseño posterior aprobado: login exclusivamente por correo y contraseña, sin registro social/público ni accesos móviles a invitaciones. React Navigation/native-stack y dependencias Expo aprobados para retroceso nativo. La recuperación se mantiene; no auto-restaurar sesión ni ofrecer restore como acceso alternativo en el nuevo login. Backend/datos/SQL de invitaciones no se borran: siguen pausados y requieren revisión funcional separada. Consultar `docs/login-navigation-design.md`; las aprobaciones de UI de invitaciones siguientes son históricas, no rutas expuestas actualmente.
+
+Diseño adaptable móvil: reutilizar `src/layout.ts` y marcos de área segura/scroll; considerar ventana pequeña, horizontal, tablet, teclado y fuente ampliada sin cortar contenido ni desactivar escalado de texto. Ver `docs/responsive-mobile.md`. Esto no autoriza soporte web ni acredita pruebas en todos los dispositivos.
+
+Recuperación por pasos aprobada: mínimo8–128 con mayúscula/símbolo/sin espacios, código8 dígitos y reenvío60s. Verificar realmente en API antes de Nueva contraseña; pase privado solo en memoria, nunca navegación/almacenamiento. No degradar a verificación solo de formato si la API vieja no soporta verify. Ver `docs/recovery-steps.md`; aplicaciónSQL008/cambioDEV requieren aprobación operativa aparte.
+
+El WIP anterior de aceptación de invitaciones se conserva en su checkout original, fuera de esta rama de publicación. No añadir rutas o contratos de invitaciones a este incremento de acceso/recuperación.
+
+Consultar `../AGENTS.md` y `../docs/DERCAS.md` (especificación funcional vigente) en el workspace de contexto. El Word `../Contexto/WhatsCommerce-EC-Documentacion-Dercas.docx` es el antecedente histórico. Si faltan las fuentes vigentes, solicitarlas; este checkout no las sustituye.
+
+Subfase 1.4 autorizada: React Native + Expo + TypeScript estricto, Android/iOS; login, restauración explícita, selector empresarial, consulta BASIC/FULL y logout, conservando health público. Componentes reutilizables de primitivas React Native con composición inspirada en shadcn, paleta y logo oficiales; sin importar componentes web ni kit visual tercero. Expo SecureStore aprobado sujeto a compatibilidad. Sin CRUD de usuarios/plataforma, UI de invitaciones, backend, AdminWeb, secretos ni SQL. Publicación inicial autorizada por el propietario mediante ramas de trabajo y PR hacia develop, sin commits directos sobre main/develop ni integración automática. Publicaciones posteriores requieren autorización expresa. Las pruebas del cliente puro no acreditan ejecución nativa en dispositivos.

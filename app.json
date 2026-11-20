@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "WhatsCommerce EC",
+    "slug": "whatscommerceec",
+    "version": "0.1.0",
+    "platforms": [
+      "android",
+      "ios"
+    ],
+    "orientation": "default",
+    "ios": {
+      "supportsTablet": true
+    },
+    "userInterfaceStyle": "light",
+    "plugins": [
+      "expo-secure-store"
+    ]
+  }
+}
