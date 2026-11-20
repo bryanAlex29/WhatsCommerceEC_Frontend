@@ -28,6 +28,16 @@ function setup() {
 }
 const login = (session: Session) => session.login('fixture@example.test', 'Synthetic!Only');
 
+it('perder foco durante login conserva busy hasta confirmar o rechazar y no duplica envío', async () => {
+  const { session, transport } = setup(); const late = deferred<unknown>(); transport.mockReturnValueOnce(late.promise);
+  const pending = login(session); session.suspendContext();
+  expect(session.getSnapshot().busy).toBe(true);
+  await login(session);
+  expect(transport.mock.calls.filter(([path]) => path === '/auth/login')).toHaveLength(1);
+  late.resolve(tokens()); await pending;
+  expect(session.getSnapshot().busy).toBe(false); expect(session.getSnapshot().user).toEqual(user);
+});
+
 describe('validadores de contrato, fixtures', () => {
   it('rechaza campos faltantes, desconocidos, token corrupto, fechas y páginas inválidas', () => {
     expect(() => sessionTokens({ ...tokens(), refreshToken: 'bad' })).toThrow();

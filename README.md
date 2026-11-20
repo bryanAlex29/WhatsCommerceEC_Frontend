@@ -1,19 +1,23 @@
 # WhatsCommerce EC · móvil
 
-Cliente Android/iOS con Expo 58.0.23, React 19.3.0, React Native 0.88.1, Expo SecureStore 58.0.2 y TypeScript ~6.0.3 estricto. Node >=22.18.0 y npm; usar `npm ci` con el lock incluido.
+Cliente Android/iOS con Expo 58.0.26, React 19.3.0, React Native 0.88.1, Expo SecureStore 58.0.3 y TypeScript ~6.0.3 estricto. Node >=22.18.0 y npm; usar `npm ci` con el lock incluido.
 
 ## Alcance aprobado
 
+Recuperación actualizada: tres pantallas con verificación real previa, pase de un uso y contraseña mínima8. [Contrato, pruebas y límites DEV](docs/recovery-steps.md). SQL008 y la API nueva fueron habilitados enDEV tras aprobación operativa y respaldo restaurado; el propietario confirmó el funcionamiento después de probar Android. No acredita aceptación exhaustiva de iOS.
+
+**Actualización de diseño:** bienvenida con logo monocromático autorizado y login solo por correo/contraseña del administrador, sin invitaciones, registro social/público ni restauración como acceso alternativo. Recuperación conservada. Navegación nativa aprobada para retroceso: [login y navegación](docs/login-navigation-design.md). El diagnóstico está separado en «Comprobar conexión». Los módulos/pruebas de invitaciones anteriores quedan aislados, sin ruta en la app; no se borran datos ni se modifica el backend. Las descripciones de1.4/1.5 siguientes se conservan como antecedentes y no sustituyen este alcance actual.
+
 Subfase 1.4: login, restauración **explícita**, selector paginado de empresas vinculadas, consulta empresarial mínima BASIC/FULL y logout. Componentes reutilizables aprobados de primitivas React Native con composición inspirada en shadcn, sin componentes web ni kit visual tercero, router o soporte web. Áreas seguras, teclado, etiquetas accesibles, foco y objetivos táctiles mínimos de 48 puntos. Paleta centralizada en `src/theme.ts`; logo oficial sin transformación en `assets/logo.png`, mostrado completo mediante `contain`, no como icono/splash.
 
-Cobertura parcial de RF-01/RF-02, RNF-01/RNF-02 y mantenibilidad: el backend sigue siendo autoridad de identidad, pertenencia, permisos y estado. No hay CRUD de plataforma/usuarios, aceptación de invitaciones, productos, WebSockets ni otros módulos comerciales. No hay usuarios/empresas simulados en ejecución. Fuentes vigentes del workspace de contexto distribuido por separado: `../AGENTS.md`, `../docs/DERCAS.md` §16, `../docs/CONTRATO-DETALLADO-PROPUESTA.md` y `../docs/OPERACION-LOCAL-PROPUESTA.md`; solicitarlas si faltan. Publicación inicial autorizada en rama de trabajo y PR a `develop`, sin integración automática. **Ni pruebas simuladas ni cliente puro bajo Node acreditan aceptación nativa o cierre completo de los RF.**
+Cobertura parcial de RF-01/RF-02, RNF-01/RNF-02 y mantenibilidad: el backend sigue siendo autoridad de identidad, pertenencia, permisos y estado. No hay CRUD de plataforma/usuarios, aceptación de invitaciones, productos, WebSockets ni otros módulos comerciales en esta entrega. El WIP de invitaciones se conserva fuera de esta rama. No hay usuarios/empresas simulados en ejecución. Fuentes vigentes del workspace de contexto distribuido por separado: `../AGENTS.md`, `../docs/DERCAS.md` §16 y §18, `../docs/CONTRATO-DETALLADO-PROPUESTA.md` y `../docs/OPERACION-LOCAL-PROPUESTA.md`; solicitarlas si faltan. Publicación autorizada mediante rama y PR a `develop`, sin integración automática. **Ni pruebas simuladas ni cliente puro bajo Node acreditan aceptación nativa o cierre completo de los RF.**
 
 ## Estado de verificación antes de publicación
 
-- Tipos/lint correctos; **66 pruebas Jest y 3 de setup** aprobadas. Incluye regresión explícita de contraseña con números enviada intacta, sin persistirla. Los números se permiten; se conservan las demás reglas aprobadas.
+- Selección de publicación: tipos/lint correctos; **138 pruebas Jest,3 setup y5 del recurso de marca** aprobadas. Incluye mínimo8, recuperación real en tres pantallas, navegación, cancelación y bloqueo del login al perder foco. Los números se permiten y no son obligatorios.
 - El runner backend `npm run test:auth:real` pasó **21 casos reales PostgreSQL/Redis/API**, incluido este cliente `Session`/fetch bajo Node para login, paginación 20+2, BASIC, rechazo de empresa ajena y logout con revocación persistida. En ese caso únicamente el almacenamiento seguro se simula.
-- Exportación Android/iOS y configuración Expo verificadas en la entrega anterior. **Pendientes:** ejecución de estas pantallas en dispositivo/emulador, SecureStore nativo, lector de pantalla y foco/contraste visual. La apertura histórica Android del bootstrap no acepta automáticamente estas pantallas nuevas.
-- Auditoría de producción reportó cinco avisos moderados transitivos de Expo; no se aplicaron actualizaciones forzadas ni cambios de SDK.
+- En esta selección:25comprobaciones reales de recuperación clienteTS/Nest/Prisma/PG17/Redis7, exportacionesAndroid/iOS y `expo install --check` correctos. El propietario reportó funcionamiento tras probarAndroid; no equivale a prueba instrumentada ni aceptación exhaustiva. **Pendientes:** iOS físico, SecureStore nativo, lector de pantalla y foco/contraste visual.
+- Auditoría completa al preparar publicación:27moderadas,ninguna alta/crítica; es una fotografía de los avisos disponibles, no auditoría de seguridad exhaustiva. Sin actualizaciones forzadas ni saltoSDK.
 
 ## Configuración y ejecución
 
@@ -39,6 +43,8 @@ API centralizada en `src/api/client.ts`; tipos y validadores de frontera en `src
 - `POST /api/auth/logout` con `{refreshToken}` → `204`, sin depender de access vigente.
 - `GET /api/auth/me` → `UserSelf`; `GET /api/me/companies?cursor=...` → páginas hasta 20, `items` y `nextCursor`.
 - `GET /api/companies/{companyId}` → representación discriminada BASIC/FULL completa. Identificador solicitado en ruta, sin cabecera/body empresarial paralelo.
+- `POST /api/auth/password-recovery/verify` con `{email,code}` → `{resetToken,expiresAt}` solo tras verificar el código.
+- `POST /api/auth/password-recovery/complete` con `{email,resetToken,password}` → `204`, sin sesión automática.
 
 El selector ofrece «Cargar más empresas» hasta `nextCursor: null`; un cursor inválido elimina las páginas y reinicia una sola vez. Empresa ajena/inexistente tiene el mismo mensaje genérico. Estados bloqueados conservan la identidad, no la vista empresarial. Permisos no se deducen de JWT ni del selector. Foco de app revalida el contexto; al pasar a segundo plano se elimina la representación empresarial. No se promete detección instantánea de suspensión/revocación.
 
@@ -46,7 +52,7 @@ El selector ofrece «Cargar más empresas» hasta `nextCursor: null`; un cursor 
 
 `src/auth/session.ts` es el único propietario de credenciales y datos privados, con adaptador seguro inyectable. Access solo en memoria; **solo refresh** se persiste en SecureStore, nunca AsyncStorage, contraseñas, permisos o datos empresariales. Guardado seguro antes de publicar sesión; fallo de guardado no presenta sesión válida. Opciones iOS `WHEN_UNLOCKED_THIS_DEVICE_ONLY`; sin biometría añadida. La documentación oficial [SecureStore SDK58](https://docs.expo.dev/versions/latest/sdk/securestore/) recomienda ~58.0.2 y soporta Android/iOS. El módulo fijado se incorporó con `EXPO_NO_DOTENV=1 npx expo install expo-secure-store@58.0.2 --npm`; el plugin configura exclusión del backup Android. Keychain iOS puede sobrevivir reinstalación: no restaurar automáticamente ni asumir logout por desinstalación. Compatibilidad estática comprobada; cifrado y comportamiento real del sistema aún requieren dispositivo.
 
-- Restauración solo al pulsar su acción. Sin refresh seguro se pide login; no hay permisos/cachés persistidos que restaurar.
+- El método interno de restauración se conserva para pruebas/compatibilidad, pero el acceso actual no lo expone ni lo ejecuta automáticamente: se pide login por correo/contraseña. No hay permisos/cachés persistidos que restaurar.
 - Renovación single-flight únicamente ante `401 ACCESS_TOKEN_EXPIRED`; GET se repite como máximo una vez. Login/refresh/logout nunca se reproducen automáticamente; `403/404/409` no renuevan. Incertidumbre solicita login, limpia e intenta revocar sin prometer éxito remoto.
 - Se validan DTO completos, claves desconocidas/faltantes, formatos de tokens/fechas/UUID y discriminante. La firma/claims JWT, autorización y vigencia de 15 minutos/7 días absolutos corresponden al servidor; el móvil no extiende vencimientos ni autoriza mediante claims.
 - Almacenamiento/logout serializados, AbortSignal y generaciones de sesión/contexto impiden repoblar datos con respuestas antiguas. FULL→BASIC siempre reemplaza, nunca fusiona datos fiscales. Una respuesta de credenciales tardía intenta revocarse sin volver a persistirla.

@@ -221,6 +221,6 @@ export class Session {
       if (generation === this.generation && context === this.contextGeneration) { this.selectedId = null; this.update({ company: null, message: message(error) }); }
     } finally { if (generation === this.generation && context === this.contextGeneration) this.update({ busy: false }); }
   }
-  suspendContext() { this.contextGeneration++; this.abortCompanyRequests(); this.update({ company: null, busy: false }); }
+  suspendContext() { this.contextGeneration++; this.abortCompanyRequests(); this.update({ company: null, busy: this.authPending }); }
   async focus() { if (this.selectedId) await this.selectCompany(this.selectedId); else if (this.state.user) await this.loadCompanies(); }
 }

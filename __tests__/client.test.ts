@@ -34,3 +34,19 @@ it('recuperación exige 202/204 y rechaza otros éxitos sin reintentar', async (
   fetchMock.mockResolvedValueOnce({ ok: true, status: 200, json });
   await expect(request('/auth/password-recovery/reset', { method: 'POST' })).rejects.toBeInstanceOf(ApiError);
 });
+it('verify exige200 y complete204 sin leer JSON ni repetir el POST', async () => {
+  const grant={resetToken:'A'.repeat(43),expiresAt:'2027-01-01T00:00:00.000Z'};
+  fetchMock.mockResolvedValueOnce({ok:true,status:200,json:async()=>grant});
+  await expect(request('/auth/password-recovery/verify',{method:'POST'})).resolves.toEqual(grant);
+  const json=jest.fn();fetchMock.mockResolvedValueOnce({ok:true,status:204,json});
+  await expect(request('/auth/password-recovery/complete',{method:'POST'})).resolves.toBeUndefined();
+  expect(json).not.toHaveBeenCalled();
+  fetchMock.mockResolvedValueOnce({ok:true,status:200,json});
+  await expect(request('/auth/password-recovery/complete',{method:'POST'})).rejects.toBeInstanceOf(ApiError);
+  expect(fetchMock).toHaveBeenCalledTimes(3);
+});
+it('propaga Retry-After acotado sin exponer el mensaje remoto', async () => {
+  fetchMock.mockResolvedValueOnce({ok:false,status:429,headers:{get:()=> '180'},json:async()=>({error:{code:'RATE_LIMITED',message:'private fixture'}})});
+  await expect(request('/auth/password-recovery/verify',{method:'POST'})).rejects.toMatchObject({code:'RATE_LIMITED',retryAfter:180});
+  expect(fetchMock).toHaveBeenCalledTimes(1);
+});

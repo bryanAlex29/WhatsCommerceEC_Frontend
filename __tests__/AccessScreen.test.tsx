@@ -19,15 +19,24 @@ function setup() {
 }
 beforeEach(() => jest.spyOn(AppState, 'addEventListener').mockReturnValue({ remove: jest.fn() }));
 afterEach(() => jest.restoreAllMocks());
-it('abre recuperación desde login, limpia contraseña y permite volver', () => {
-  const { session, transport } = setup(); render(<AccessScreen session={session} />);
+it('abre la ruta de recuperación y limpia contraseña antes de salir', () => {
+  const onRecover = jest.fn();
+  const { session, transport } = setup(); render(<AccessScreen session={session} onRecover={onRecover} />);
   fireEvent.changeText(screen.getByLabelText('Contraseña'), 'SyntheticSecret!');
   fireEvent.press(screen.getByRole('button', { name: '¿Olvidaste tu contraseña?' }));
-  expect(screen.getByLabelText('Correo registrado')).toBeTruthy();
-  expect(screen.queryByLabelText('Contraseña')).toBeNull();
-  fireEvent.press(screen.getByRole('button', { name: 'Volver al login' }));
+  expect(onRecover).toHaveBeenCalledTimes(1);
   expect(screen.getByLabelText('Contraseña').props.value).toBe('');
   expect(transport).not.toHaveBeenCalled();
+});
+it('permite mostrar/ocultar contraseña sin cambiarla, sin registro ni invitaciones', () => {
+  const { session } = setup(); render(<AccessScreen session={session} />);
+  fireEvent.changeText(screen.getByLabelText('Contraseña'), 'SyntheticSecret!');
+  fireEvent.press(screen.getByRole('button', { name: 'Mostrar contraseña' }));
+  expect(screen.getByLabelText('Contraseña').props.secureTextEntry).toBe(false);
+  expect(screen.getByLabelText('Contraseña').props.value).toBe('SyntheticSecret!');
+  fireEvent.press(screen.getByRole('button', { name: 'Ocultar contraseña' }));
+  expect(screen.getByLabelText('Contraseña').props.secureTextEntry).toBe(true);
+  expect(screen.queryByRole('button', { name: /invitación|Google|Registr|Restaurar sesión/i })).toBeNull();
 });
 it('campos etiquetados y protegidos; validación local no envía vacío', () => {
   const { session, transport } = setup(); render(<AccessScreen session={session} />);
